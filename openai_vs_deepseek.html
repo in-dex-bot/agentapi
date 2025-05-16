@@ -40,9 +40,8 @@
     class CombinedCalculators extends React.Component {
       render() {
         return (
-         
+         <header className="text-center mb-5" style="background: #60adbb;">Calculadora para APIs de IA</header>
           <div className="main-container">
-          <h1 className="text-center mb-5">Calculadoras de Costos API</h1>
            {/* Explicación general */}
             <div className="alert alert-info mb-4">
               <h4>📚 Conceptos Clave para Ambas APIs</h4>
@@ -124,7 +123,7 @@
             const tasaReal = res.data.usd.cop;
             this.setState({ usdRate: tasaReal });
           });
-      } // <--- ¡Faltaba este cierre!
+      } 
 
       handleChange = (e) => {
         const { name, value } = e.target;
@@ -229,7 +228,7 @@
             const tasaReal = res.data.usd.cop;
             this.setState({ usdRate: tasaReal });
           });
-      } // <--- ¡Faltaba este cierre!
+      } 
 
       handleChange = (e) => {
         const { name, value } = e.target;
