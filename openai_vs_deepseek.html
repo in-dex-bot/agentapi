@@ -239,9 +239,9 @@
         const { inputTokens, outputTokens, model, usdRate } = this.state;
         
         const prices = {
-          'gpt-4':        { input: 0.03,   output: 0.06 },
-          'gpt-4-turbo':  { input: 0.01,   output: 0.03 },
-          'gpt-3.5-turbo':{ input: 0.0005, output: 0.0015 }
+          "gpt-4o":        { input: 0.005,  output: 0.015 },
+          "gpt-4-turbo":   { input: 0.01,   output: 0.03 },
+          "gpt-3.5-turbo": { input: 0.0005, output: 0.0015 }
         };
 
         const inputCost = (inputTokens / 1000000) * prices[model].input;
