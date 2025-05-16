@@ -48,15 +48,29 @@
             <header className="text-white text-center py-4 mb-5" style={{ background: "#60adbb", fontSize: "24px" }}>
               Calculadora para APIs de IA
             </header>
-
             <div className="main-container">
+              
               <div className="alert alert-info mb-4">
-                <h4>📚 Conceptos Clave para Ambas APIs</h4>
+                <h4>📚 Conceptos Clave para las APIs de OpenAi y DeepSeek</h4>
                 <p>
                   <strong>Token:</strong> Unidad básica de texto procesado (~4 caracteres)<br/>
                   <strong>Fórmula Unificada:</strong><br/> 
                   Costo Total = (Tokens Entrada × Precio Input/1M) + (Tokens Salida × Precio Output/1M)
                 </p>
+              </div>
+
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="calculator-card">
+                    <DeepSeekCalculator />
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="calculator-card">
+                    <OpenAICalculator />
+                  </div>
+                </div>
               </div>
 
               <div className="alert alert-warning mb-4">
@@ -89,20 +103,7 @@
                 </table>
                 <p className="mt-3"><strong>Nota:</strong> Misma mecánica de cálculo, diferentes estructuras de precios</p>
               </div>
-
-              <div className="row">
-                <div className="col-md-6">
-                  <div className="calculator-card">
-                    <DeepSeekCalculator />
-                  </div>
-                </div>
-
-                <div className="col-md-6">
-                  <div className="calculator-card">
-                    <OpenAICalculator />
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
         );
