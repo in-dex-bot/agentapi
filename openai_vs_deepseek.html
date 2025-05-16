@@ -117,10 +117,14 @@
         usdRate: 3900
       };
 
+     
       componentDidMount() {
-        axios.get("https://api.coingecko.com/api/v3/exchange_rates")
-          .then(res => this.setState({ usdRate: res.data.rates.cop.value }));
-      }
+        axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=cop")
+          .then(res => {
+            const tasaReal = res.data.usd.cop;
+            this.setState({ usdRate: tasaReal });
+          });
+      } // <--- ¡Faltaba este cierre!
 
       handleChange = (e) => {
         const { name, value } = e.target;
@@ -218,12 +222,14 @@
         usdRate: 3900
       };
 
+      
       componentDidMount() {
         axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=cop")
-        .then(res => {
-          const tasaReal = res.data.usd.cop; // Ej: 4182.17
-          this.setState({ usdRate: tasaReal });
-        });
+          .then(res => {
+            const tasaReal = res.data.usd.cop;
+            this.setState({ usdRate: tasaReal });
+          });
+      } // <--- ¡Faltaba este cierre!
 
       handleChange = (e) => {
         const { name, value } = e.target;
