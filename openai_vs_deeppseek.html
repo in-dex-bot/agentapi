@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Calculadoras de APIs de IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <style>
+    .calculator-container { 
+      max-width: 1200px; 
+      padding: 20px;
+      margin: 0 auto;
+    }
+    .calculator-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin: 15px;
+      height: 100%;
+    }
+    .result-box {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .model-title {
+      color: #2c3e50;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    class AICalculators extends React.Component {
+      render() {
+        return (
+          <div className="calculator-container">
+            <h1 className="text-center mb-5">Calculadoras de Costos para APIs de IA</h1>
+            
+            <div className="row">
+              {/* Calculadora DeepSeek */}
+              <div className="col-md-6">
+                <div className="calculator-card">
+                  <DeepSeekCalculator />
+                </div>
+              </div>
+              
+              {/* Calculadora OpenAI */}
+              <div className="col-md-6">
+                <div className="calculator-card">
+                  <OpenAICalculator />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    class DeepSeekCalculator extends React.Component {
+      state = {
+        inputTokens: 1000,
+        outputTokens: 500,
+        model: "deepseek-chat",
+        usdCost: 0,
+        copCost: 0,
+        usdRate: 3900
+      };
+
+      componentDidMount() {
+        axios.get("https://api.coingecko.com/api/v3/exchange_rates")
+          .then(res => this.setState({ usdRate: res.data.rates.cop?.value || 3900 }));
+      }
+
+      handleChange = (e) => {
+        const { name, value } = e.target;
+        this.setState({ [name]: value }, this.calculateCost);
+      };
+
+      calculateCost = () => {
+        const { inputTokens, outputTokens, model, usdRate } = this.state;
+        const prices = {
+          'deepseek-chat': { input: 0.0007, output: 0.0028 },
+          'deepseek-coder': { input: 0.0015, output: 0.0060 }
+        };
+
+        const inputCost = (inputTokens / 1e6) * prices[model].input;
+        const outputCost = (outputTokens / 1e6) * prices[model].output;
+        const totalUSD = inputCost + outputCost;
+        
+        this.setState({
+          usdCost: totalUSD.toFixed(5),
+          copCost: (totalUSD * usdRate).toFixed(2)
+        });
+      };
+
+      render() {
+        return (
+          <div>
+            <h3 className="model-title">DeepSeek API</h3>
+            <div className="form-group">
+              <label>Modelo:</label>
+              <select
+                className="form-control"
+                name="model"
+                value={this.state.model}
+                onChange={this.handleChange}
+              >
+                <option value="deepseek-chat">Chat (1K contexto)</option>
+                <option value="deepseek-coder">Coder (4K contexto)</option>
+              </select>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Tokens Entrada</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={this.state.inputTokens}
+                    name="inputTokens"
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Tokens Salida</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={this.state.outputTokens}
+                    name="outputTokens"
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="result-box">
+              <h5>Costo Estimado:</h5>
+              <div className="h4 text-primary">USD ${this.state.usdCost}</div>
+              <div className="h5">COP ${this.state.copCost}</div>
+              <small className="text-muted">Tasa: 1 USD = ${this.state.usdRate} COP</small>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    class OpenAICalculator extends React.Component {
+      state = {
+        inputTokens: 1000,
+        outputTokens: 500,
+        model: "gpt-4-turbo",
+        usdCost: 0,
+        copCost: 0,
+        usdRate: 3900
+      };
+
+      componentDidMount() {
+        axios.get("https://api.coingecko.com/api/v3/exchange_rates")
+          .then(res => this.setState({ usdRate: res.data.rates.cop?.value || 3900 }));
+      }
+
+      handleChange = (e) => {
+        const { name, value } = e.target;
+        this.setState({ [name]: value }, this.calculateCost);
+      };
+
+      calculateCost = () => {
+        const { inputTokens, outputTokens, model, usdRate } = this.state;
+        const prices = {
+          'gpt-4': { input: 0.03, output: 0.06 },
+          'gpt-4-turbo': { input: 0.01, output: 0.03 },
+          'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 }
+        };
+
+        const inputCost = (inputTokens / 1e6) * prices[model].input;
+        const outputCost = (outputTokens / 1e6) * prices[model].output;
+        const totalUSD = inputCost + outputCost;
+        
+        this.setState({
+          usdCost: totalUSD.toFixed(5),
+          copCost: (totalUSD * usdRate).toFixed(2)
+        });
+      };
+
+      render() {
+        return (
+          <div>
+            <h3 className="model-title">OpenAI API</h3>
+            <div className="form-group">
+              <label>Modelo:</label>
+              <select
+                className="form-control"
+                name="model"
+                value={this.state.model}
+                onChange={this.handleChange}
+              >
+                <option value="gpt-4">GPT-4</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              </select>
+            </div>
+
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Tokens Entrada</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={this.state.inputTokens}
+                    name="inputTokens"
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Tokens Salida</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={this.state.outputTokens}
+                    name="outputTokens"
+                    onChange={this.handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="result-box">
+              <h5>Costo Estimado:</h5>
+              <div className="h4 text-primary">USD ${this.state.usdCost}</div>
+              <div className="h5">COP ${this.state.copCost}</div>
+              <small className="text-muted">Tasa: 1 USD = ${this.state.usdRate} COP</small>
+            </div>
+          </div>
+        );
+      }
+    }
+
+    ReactDOM.render(<AICalculators />, document.getElementById('root'));
+  </script>
+</body>
+</html>
