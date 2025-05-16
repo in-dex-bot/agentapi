@@ -43,29 +43,20 @@
           <div className="main-container">
             <h1 className="text-center mb-5">Calculadoras de Costos API</h1>
             
-            <div className="alert alert-info mb-4">
-              <h4>📚 ¿Qué significa "precio por millón de tokens"?</h4>
-              <p>
-                Los modelos de IA procesan texto en unidades llamadas <strong>tokens</strong>. 
-                En términos prácticos:
-              </p>
-              <ul>
-                <li>1 token ≈ 4 caracteres en inglés</li>
-                <li>1 token ≈ 3/4 de una palabra promedio</li>
-                <li>1,000 tokens ≈ 750 palabras</li>
-              </ul>
-              <p>
-                El costo se calcula por cada <strong>millón de tokens (1M)</strong> procesados:<br/>
-                <span className="text-muted">Costo Total = (Tokens Entrada × Precio Input/1M) + (Tokens Salida × Precio Output/1M)</span>
-              </p>
-              <p className="mb-0">
-                Ejemplo: Si un modelo cobra $0.50 por 1M tokens de entrada y procesas 500,000 tokens,<br/> 
-                el costo sería: (500,000 / 1,000,000) × $0.50 = $0.25
-              </p>
-            </div>
-
             <div className="row">
-              <!-- Mantener mismas columnas de calculadoras -->
+              {/* Calculadora DeepSeek */}
+              <div className="col-md-6">
+                <div className="calculator-card">
+                  <DeepSeekCalculator />
+                </div>
+              </div>
+              
+              {/* Calculadora OpenAI */}
+              <div className="col-md-6">
+                <div className="calculator-card">
+                  <OpenAICalculator />
+                </div>
+              </div>
             </div>
           </div>
         );
