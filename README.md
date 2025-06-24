@@ -1,4 +1,6 @@
-Proyecto para implementar el nuevo SEO de Google con gemini para esta página:
+Proyecto para implementar el nuevo SEO de Google con gemini para esta página de este repo:
+
+https://in-dex-bot.github.io/iacostos/
 
 Dos sitios para conectar esta página con el motor de búsqueda de Google:
 
