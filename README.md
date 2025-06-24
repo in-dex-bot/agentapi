@@ -13,6 +13,9 @@ Estadistica de acceso de usuarios en tiempo real.
 
 3. Agregarle adsense, después de que está posicionada.
 
+![imagen](https://github.com/user-attachments/assets/5f5c6539-c6e6-4d75-a0d1-52812f7ad13f)
+
+
 ````
 Para calcular el costo de desarrollo de esta aplicación, necesito hacer una estimación basada en los tokens de entrada y salida que utilicé.
 
