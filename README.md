@@ -1,3 +1,7 @@
+Proyecto para imlementar el nuevo SEO de Google con gemini
+
+
+
 ````
 Para calcular el costo de desarrollo de esta aplicación, necesito hacer una estimación basada en los tokens de entrada y salida que utilicé.
 
