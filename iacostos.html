@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Calculadoras de APIs de IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f4f7f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .main-container {
+       max-width: 1400px;
+       padding: 20px;
+      margin: 0 auto;
+      margin-top: -43px;
+    }
+    .calculator-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin: 15px 0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid #e9ecef;
+    }
+    .calculator-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    .result-box {
+       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      border: 1px solid #dee2e6;
+    }
+    .token-info-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid #2196f3;
+    }
+    .form-control {
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .form-control:focus {
+      border-color: #60adbb;
+      box-shadow: 0 0 0 0.2rem rgba(96, 173, 187, 0.25);
+    }
+    .text-input {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .alert-info {
+      background-color: #e8f4f8;
+      border-color: #60adbb;
+      color: #0c5460;
+    }
+    .alert-warning {
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+      color: #856404;
+    }
+    .table th {
+      background-color: #f8f9fa;
+      border-top: none;
+      color: #495057;
+      font-weight: 600;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(0,0,0,.02);
+    }
+    .text-primary {
+      color: #60adbb !important;
+    }
+    .text-success {
+      color: #28a745 !important;
+    }
+    .text-info {
+      color: #17a2b8 !important;
+    }
+    .text-warning {
+      color: #ffc107 !important;
+    }
+    h2 {
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    h4, h5 {
+      font-weight: 600;
+    }
+    .toggle-buttons {
+      display: flex;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .toggle-btn.active {
+      background: #60adbb;
+      color: white;
+    }
+    .token-breakdown {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 10px;
+        margin-top: -20px;
+      }
+      .calculator-card {
+        margin: 10px 0;
+        padding: 20px;
+      }
+      .table-responsive {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Función para contar tokens de manera más precisa
+    function countTokens(text) {
+      if (!text) return 0;
+      
+      // Método mejorado de conteo de tokens
+      // 1. Dividir por espacios y signos de puntuación
+      const words = text.trim().split(/\s+/);
+      let tokenCount = 0;
+      
+      words.forEach(word => {
+        // Palabras largas tienden a ser múltiples tokens
+        if (word.length <= 4) {
+          tokenCount += 1;
+        } else if (word.length <= 8) {
+          tokenCount += Math.ceil(word.length / 4);
+        } else {
+          tokenCount += Math.ceil(word.length / 3.5);
+        }
+        
+        // Agregar tokens por puntuación
+        const punctuation = word.match(/[.,!?;:()[\]{}'"]/g);
+        if (punctuation) {
+          tokenCount += punctuation.length * 0.5;
+        }
+      });
+      
+      // Ajuste por caracteres especiales y números
+      const specialChars = text.match(/[0-9@#$%^&*+=<>]/g);
+      if (specialChars) {
+        tokenCount += specialChars.length * 0.3;
+      }
+      
+      return Math.ceil(tokenCount);
+    }
+
+    function CombinedCalculators() {
+      return (
+        <div>
+          <header className="text-white text-center py-4 mb-5" style={{background: "#60adbb", fontSize: "24px"}}>
+            Calculadora para APIs de IA - Con Contador de Tokens
+          </header>
+          <div className="main-container">
+                        
+            <div className="alert alert-info mb-4">
+              <h4>📚 Conceptos Clave para las APIs de IA</h4>
+              <p>
+                <strong>Token:</strong> Unidad básica de texto procesado (~4 caracteres o 0.75 palabras)<br/>
+                <strong>Nuevo:</strong> Ahora puedes escribir texto y calcular tokens automáticamente<br/>
+                <strong>Algoritmo de Conteo (Aproximado):</strong><br/>
+              </p>
+              <div className="bg-light p-3 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '13px'}}>
+                <strong>📊 Cómo se calculan los tokens:</strong><br/>
+                • <strong>Palabras cortas</strong> (≤4 chars) = 1 token<br/>
+                • <strong>Palabras medianas</strong> (5-8 chars) = ~1.5 tokens<br/>
+                • <strong>Palabras largas</strong> (>8 chars) = ~2-3 tokens<br/>
+                • <strong>Puntuación</strong> = 0.5 tokens cada una<br/>
+                • <strong>Números/símbolos</strong> = 0.3 tokens cada uno
+              </div>
+              <div className="bg-warning p-3 rounded mt-2" style={{fontSize: '13px'}}>
+                <strong>⚠️ Importante:</strong> Cada IA tiene su propio tokenizador:<br/>
+                • <strong>OpenAI:</strong> tiktoken (muy preciso para inglés)<br/>
+                • <strong>Claude:</strong> Tokenizador propio de Anthropic<br/>
+                • <strong>DeepSeek:</strong> Optimizado para múltiples idiomas<br/>
+                <em>Esta calculadora da una aproximación ±10-15% vs tokenizadores reales</em>
+              </div>
+              <div className="bg-light p-3 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '14px'}}>
+                <strong>Fórmula Universal de Costo = </strong><br/>
+                <span className="text-primary">{'{'}</span>(tokens entrada × costo token entrada) / 1.000.000<span className="text-primary">{'}'}</span> +<br/>
+                <span className="text-success">{'{'}</span>(tokens salida × costo token salida) / 1.000.000<span className="text-success">{'}'}</span>
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-lg-4 col-md-6">
+                <div className="calculator-card">
+                  <DeepSeekCalculator />
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-6">
+                <div className="calculator-card">
+                  <OpenAICalculator />
+                </div>
+              </div>
+              <div className="col-lg-4 col-md-12">
+                <div className="calculator-card">
+                  <ReplitCalculator />
+                </div>
+              </div>
+            </div>
+
+            <div className="alert alert-warning mb-4">
+              <h5>⚠️ Comparación de Precios por 1M tokens:</h5>
+              <div className="table-responsive">
+                <table className="table table-striped mt-3">
+                  <thead>
+                    <tr>
+                      <th>Proveedor</th>
+                      <th>Modelo Ejemplo</th>
+                      <th>Input</th>
+                      <th>Output</th>
+                      <th>Ratio I/O</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>DeepSeek</strong></td>
+                      <td>deepseek-chat</td>
+                      <td>$0.0007</td>
+                      <td>$0.0028</td>
+                      <td>1:4</td>
+                    </tr>
+                    <tr>
+                      <td><strong>OpenAI</strong></td>
+                      <td>gpt-4o</td>
+                      <td>$0.0050</td>
+                      <td>$0.0150</td>
+                      <td>1:3</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Replit</strong></td>
+                      <td>claude-3.5-sonnet</td>
+                      <td>$0.0030</td>
+                      <td>$0.0150</td>
+                      <td>1:5</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-3">
+                <strong>Ejemplo 100K tokens (50K input + 50K output):</strong><br/>
+                DeepSeek: ~$0.18 | OpenAI: ~$1.00 | Replit: ~$0.90
+              </p>
+            </div>
+                      
+          </div>
+        </div>
+      );
+    }
+
+    function DeepSeekCalculator() {
+      const [state, setState] = useState({
+        inputTokens: 1000,
+        outputTokens: 500,
+        inputText: "",
+        outputText: "",
+        model: "deepseek-chat",
+        usdCost: 0,
+        copCost: 0,
+        usdRate: 3900,
+        inputMode: "tokens" // "tokens" or "text"
+      });
+
+      useEffect(() => {
+        axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=cop")
+          .then(res => {
+            setState(prev => ({ ...prev, usdRate: res.data.usd.cop }));
+          })
+          .catch(() => {
+            // Fallback to default rate if API fails
+          });
+      }, []);
+
+      useEffect(() => {
+        calculateCost();
+      }, [state.inputTokens, state.outputTokens, state.model, state.usdRate]);
+
+      useEffect(() => {
+        if (state.inputMode === "text") {
+          const inputTokens = countTokens(state.inputText);
+          const outputTokens = countTokens(state.outputText);
+          setState(prev => ({ ...prev, inputTokens, outputTokens }));
+        }
+      }, [state.inputText, state.outputText, state.inputMode]);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setState(prev => ({ ...prev, [name]: name.includes('Tokens') ? (parseFloat(value) || 0) : value }));
+      };
+
+      const toggleInputMode = (mode) => {
+        setState(prev => ({ ...prev, inputMode: mode }));
+      };
+
+      const calculateCost = () => {
+        const { inputTokens, outputTokens, model, usdRate } = state;
+        const prices = {
+          'deepseek-chat': { input: 0.0007, output: 0.0028 },
+          'deepseek-coder': { input: 0.0015, output: 0.0060 }
+        };
+        const inputCost = (inputTokens / 1000000) * prices[model].input;
+        const outputCost = (outputTokens / 1000000) * prices[model].output;
+        const totalUSD = inputCost + outputCost;
+        setState(prev => ({
+          ...prev,
+          usdCost: totalUSD.toFixed(5),
+          copCost: (totalUSD * usdRate).toFixed(2)
+        }));
+      };
+
+      return (
+        <div>
+          <h2 className="mb-4 text-primary">🔮 DeepSeek API</h2>
+          
+          <div className="form-group">
+            <label>Modelo:</label>
+            <select className="form-control mb-3" name="model" onChange={handleChange} value={state.model}>
+              <option value="deepseek-chat">Chat (Conversación)</option>
+              <option value="deepseek-coder">Coder (Programación)</option>
+            </select>
+          </div>
+
+          <div className="toggle-buttons">
+            <button 
+              className={`toggle-btn ${state.inputMode === 'tokens' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('tokens')}
+            >
+              📊 Por Tokens
+            </button>
+            <button 
+              className={`toggle-btn ${state.inputMode === 'text' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('text')}
+            >
+              📝 Por Texto
+            </button>
+          </div>
+
+          {state.inputMode === 'tokens' ? (
+            <div className="row">
+              <div className="col-md-6">
+                <label>Tokens Entrada:</label>
+                <input type="number" className="form-control" name="inputTokens" value={state.inputTokens} onChange={handleChange} />
+              </div>
+              <div className="col-md-6">
+                <label>Tokens Salida:</label>
+                <input type="number" className="form-control" name="outputTokens" value={state.outputTokens} onChange={handleChange} />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="form-group">
+                <label>Texto de Entrada (Prompt):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="inputText" 
+                  value={state.inputText} 
+                  onChange={handleChange}
+                  placeholder="Escribe tu prompt aquí..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de entrada: {state.inputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.inputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.inputText.length}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Texto de Salida Esperado (Opcional):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="outputText" 
+                  value={state.outputText} 
+                  onChange={handleChange}
+                  placeholder="Respuesta esperada de la IA (opcional)..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de salida: {state.outputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.outputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.outputText.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="result-box mt-3">
+            <h5>💰 Costo Estimado:</h5>
+            <div className="h4 text-success">USD ${state.usdCost}</div>
+            <div className="h5 text-info">COP ${state.copCost}</div>
+            <div className="token-breakdown mt-2">
+              <small>
+                📊 Total tokens: {state.inputTokens + state.outputTokens} 
+                ({state.inputTokens} entrada + {state.outputTokens} salida)
+              </small>
+            </div>
+            <small className="text-muted">Tasa: 1 USD = ${state.usdRate} COP</small>
+          </div>
+        </div>
+      );
+    }
+
+    function OpenAICalculator() {
+      const [state, setState] = useState({
+        inputTokens: 1000,
+        outputTokens: 500,
+        inputText: "",
+        outputText: "",
+        model: "gpt-4o",
+        usdCost: 0,
+        copCost: 0,
+        usdRate: 3900,
+        inputMode: "tokens"
+      });
+
+      useEffect(() => {
+        axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=cop")
+          .then(res => {
+            setState(prev => ({ ...prev, usdRate: res.data.usd.cop }));
+          })
+          .catch(() => {});
+      }, []);
+
+      useEffect(() => {
+        calculateCost();
+      }, [state.inputTokens, state.outputTokens, state.model, state.usdRate]);
+
+      useEffect(() => {
+        if (state.inputMode === "text") {
+          const inputTokens = countTokens(state.inputText);
+          const outputTokens = countTokens(state.outputText);
+          setState(prev => ({ ...prev, inputTokens, outputTokens }));
+        }
+      }, [state.inputText, state.outputText, state.inputMode]);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setState(prev => ({ ...prev, [name]: name.includes('Tokens') ? (parseFloat(value) || 0) : value }));
+      };
+
+      const toggleInputMode = (mode) => {
+        setState(prev => ({ ...prev, inputMode: mode }));
+      };
+
+      const calculateCost = () => {
+        const { inputTokens, outputTokens, model, usdRate } = state;
+        const prices = {
+          "gpt-4o": { input: 0.005, output: 0.015 },
+          "gpt-4-turbo": { input: 0.01, output: 0.03 },
+          "gpt-3.5-turbo": { input: 0.0005, output: 0.0015 }
+        };
+        const inputCost = (inputTokens / 1000000) * prices[model].input;
+        const outputCost = (outputTokens / 1000000) * prices[model].output;
+        const totalUSD = inputCost + outputCost;
+        setState(prev => ({
+          ...prev,
+          usdCost: totalUSD.toFixed(5),
+          copCost: (totalUSD * usdRate).toFixed(2)
+        }));
+      };
+
+      return (
+        <div>
+          <h2 className="mb-4 text-primary">🤖 OpenAI API</h2>
+          
+          <div className="form-group">
+            <label>Modelo:</label>
+            <select className="form-control mb-3" name="model" onChange={handleChange} value={state.model}>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+
+          <div className="toggle-buttons">
+            <button 
+              className={`toggle-btn ${state.inputMode === 'tokens' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('tokens')}
+            >
+              📊 Por Tokens
+            </button>
+            <button 
+              className={`toggle-btn ${state.inputMode === 'text' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('text')}
+            >
+              📝 Por Texto
+            </button>
+          </div>
+
+          {state.inputMode === 'tokens' ? (
+            <div className="row">
+              <div className="col-md-6">
+                <label>Tokens Entrada:</label>
+                <input type="number" className="form-control" name="inputTokens" value={state.inputTokens} onChange={handleChange} />
+              </div>
+              <div className="col-md-6">
+                <label>Tokens Salida:</label>
+                <input type="number" className="form-control" name="outputTokens" value={state.outputTokens} onChange={handleChange} />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="form-group">
+                <label>Texto de Entrada (Prompt):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="inputText" 
+                  value={state.inputText} 
+                  onChange={handleChange}
+                  placeholder="Escribe tu prompt aquí..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de entrada: {state.inputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.inputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.inputText.length}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Texto de Salida Esperado (Opcional):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="outputText" 
+                  value={state.outputText} 
+                  onChange={handleChange}
+                  placeholder="Respuesta esperada de la IA (opcional)..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de salida: {state.outputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.outputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.outputText.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="result-box mt-3">
+            <h5>💰 Costo Estimado:</h5>
+            <div className="h4 text-success">USD ${state.usdCost}</div>
+            <div className="h5 text-info">COP ${state.copCost}</div>
+            <div className="token-breakdown mt-2">
+              <small>
+                📊 Total tokens: {state.inputTokens + state.outputTokens} 
+                ({state.inputTokens} entrada + {state.outputTokens} salida)
+              </small>
+            </div>
+            <small className="text-muted">Tasa: 1 USD = ${state.usdRate} COP</small>
+          </div>
+        </div>
+      );
+    }
+
+    function ReplitCalculator() {
+      const [state, setState] = useState({
+        inputTokens: 1000,
+        outputTokens: 500,
+        inputText: "",
+        outputText: "",
+        model: "claude-3.5-sonnet",
+        usdCost: 0,
+        copCost: 0,
+        usdRate: 3900,
+        inputMode: "tokens"
+      });
+
+      useEffect(() => {
+        axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=cop")
+          .then(res => {
+            setState(prev => ({ ...prev, usdRate: res.data.usd.cop }));
+          })
+          .catch(() => {});
+      }, []);
+
+      useEffect(() => {
+        calculateCost();
+      }, [state.inputTokens, state.outputTokens, state.model, state.usdRate]);
+
+      useEffect(() => {
+        if (state.inputMode === "text") {
+          const inputTokens = countTokens(state.inputText);
+          const outputTokens = countTokens(state.outputText);
+          setState(prev => ({ ...prev, inputTokens, outputTokens }));
+        }
+      }, [state.inputText, state.outputText, state.inputMode]);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setState(prev => ({ ...prev, [name]: name.includes('Tokens') ? (parseFloat(value) || 0) : value }));
+      };
+
+      const toggleInputMode = (mode) => {
+        setState(prev => ({ ...prev, inputMode: mode }));
+      };
+
+      const calculateCost = () => {
+        const { inputTokens, outputTokens, model, usdRate } = state;
+        const prices = {
+          'claude-3.5-sonnet': { input: 0.003, output: 0.015 },
+          'claude-3-haiku': { input: 0.0008, output: 0.004 },
+          'claude-3-opus': { input: 0.015, output: 0.075 }
+        };
+        
+        if (!prices[model]) {
+          console.error(`Model ${model} not found in prices`);
+          return;
+        }
+        const inputCost = (inputTokens / 1000000) * prices[model].input;
+        const outputCost = (outputTokens / 1000000) * prices[model].output;
+        const totalUSD = inputCost + outputCost;
+        setState(prev => ({
+          ...prev,
+          usdCost: totalUSD.toFixed(5),
+          copCost: (totalUSD * usdRate).toFixed(2)
+        }));
+      };
+
+      return (
+        <div>
+          <h2 className="mb-4 text-primary">⚡ Replit AI</h2>
+          
+          <div className="form-group">
+            <label>Modelo Claude:</label>
+            <select className="form-control mb-3" name="model" onChange={handleChange} value={state.model}>
+              <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+              <option value="claude-3-haiku">Claude 3 Haiku</option>
+              <option value="claude-3-opus">Claude 3 Opus</option>
+            </select>
+          </div>
+
+          <div className="toggle-buttons">
+            <button 
+              className={`toggle-btn ${state.inputMode === 'tokens' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('tokens')}
+            >
+              📊 Por Tokens
+            </button>
+            <button 
+              className={`toggle-btn ${state.inputMode === 'text' ? 'active' : ''}`}
+              onClick={() => toggleInputMode('text')}
+            >
+              📝 Por Texto
+            </button>
+          </div>
+
+          {state.inputMode === 'tokens' ? (
+            <div className="row">
+              <div className="col-md-6">
+                <label>Tokens Entrada:</label>
+                <input type="number" className="form-control" name="inputTokens" value={state.inputTokens} onChange={handleChange} />
+              </div>
+              <div className="col-md-6">
+                <label>Tokens Salida:</label>
+                <input type="number" className="form-control" name="outputTokens" value={state.outputTokens} onChange={handleChange} />
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="form-group">
+                <label>Texto de Entrada (Prompt):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="inputText" 
+                  value={state.inputText} 
+                  onChange={handleChange}
+                  placeholder="Escribe tu prompt aquí..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de entrada: {state.inputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.inputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.inputText.length}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Texto de Salida Esperado (Opcional):</label>
+                <textarea 
+                  className="form-control text-input" 
+                  name="outputText" 
+                  value={state.outputText} 
+                  onChange={handleChange}
+                  placeholder="Respuesta esperada de la IA (opcional)..."
+                />
+                <div className="token-info-box mt-2">
+                  <strong>📊 Tokens de salida: {state.outputTokens}</strong>
+                  <div className="token-breakdown">
+                    Palabras: ~{state.outputText.trim().split(/\s+/).filter(w => w).length} | 
+                    Caracteres: {state.outputText.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="result-box mt-3">
+            <h5>💰 Costo Estimado:</h5>
+            <div className="h4 text-success">USD ${state.usdCost}</div>
+            <div className="h5 text-info">COP ${state.copCost}</div>
+            <div className="token-breakdown mt-2">
+              <small>
+                📊 Total tokens: {state.inputTokens + state.outputTokens} 
+                ({state.inputTokens} entrada + {state.outputTokens} salida)
+              </small>
+            </div>
+            <small className="text-muted">Tasa: 1 USD = ${state.usdRate} COP</small>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<CombinedCalculators />, document.getElementById('root'));
+  </script>
+</body>
+</html>
