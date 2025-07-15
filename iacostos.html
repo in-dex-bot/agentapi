@@ -120,11 +120,15 @@
       margin-bottom: 25px;    /* Aumentado */
     }
     .toggle-btn {
-      display: flex;
-      background: #f8f9fa;
-      border-radius: 8px;
-      width: 50%;
-      padding: 5px;
+      flex: 1;
+      padding: 12px 20px;     /* Aumentado */
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 15px;        /* Aumentado */
+      font-weight: 500;
     }
     .token-breakdown {
       font-size: 14px;        /* Aumentado de 0.9rem */
@@ -204,7 +208,6 @@
       font-weight: 700;
       padding: 25px 0 !important;  /* Más padding */
     }
-    .toggle-btn active { background: #60adbb; }
   </style>
 </head>
 <body>
@@ -292,15 +295,21 @@
                 
                 <div className="col-lg-4 col-md-12 mb-3">
                   <div className="alert" style={{backgroundColor: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', minHeight: '280px'}}>
-                    <h5><strong>💰 Fórmula Universal</strong></h5>
-                    <p>Cálculo de costo para todas las IAs:</p>
-                    <div className="bg-light p-2 rounded" style={{fontFamily: 'monospace', fontSize: '12px'}}>
-                      <strong>Costo Total = </strong><br/>
-                      <span className="text-primary">{'{'}</span>(tokens entrada × costo token entrada) / 1.000.000<span className="text-primary">{'}'}</span> +<br/>
-                      <span className="text-success">{'{'}</span>(tokens salida × costo token salida) / 1.000.000<span className="text-success">{'}'}</span>
+                    <h5><strong>🎯 Control de Respuesta</strong></h5>
+                    <p><strong>Puedes delimitar los tokens de salida:</strong></p>
+                    <ul style={{fontSize: '13px', paddingLeft: '20px'}}>
+                      <li><strong>Por tokens:</strong> "Responde en máximo 100 tokens"</li>
+                      <li><strong>Por extensión:</strong> "Respuesta breve de 2 párrafos"</li>
+                      <li><strong>Por formato:</strong> "Lista de 5 puntos"</li>
+                      <li><strong>Por palabras:</strong> "Resumen de 50 palabras"</li>
+                    </ul>
+                    <div className="bg-light p-2 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '12px'}}>
+                      <strong>💰 Fórmula de Costo:</strong><br/>
+                      <span className="text-primary">Entrada</span> (tokens prompt) + <span className="text-success">Salida</span> (tokens respuesta)<br/>
+                      = Costo total por consulta
                     </div>
                     <small className="text-muted mt-2 d-block">
-                      Los precios por token varían según el proveedor, pero la fórmula es universal.
+                      <strong>Tip:</strong> Delimitar la respuesta te ayuda a controlar costos y obtener respuestas más precisas.
                     </small>
                   </div>
                 </div>
@@ -493,13 +502,13 @@
               </div>
               
               <div className="form-group">
-                <label>Texto de Salida Esperado (Opcional):</label>
+                <label>Texto de Salida Esperado (Puedes delimitar la respuesta):</label>
                 <textarea 
                   className="form-control text-input" 
                   name="outputText" 
                   value={state.outputText} 
                   onChange={handleChange}
-                  placeholder="Respuesta esperada de la IA (opcional)..."
+                  placeholder="Ej: 'Responde en máximo 50 tokens' o 'Lista de 3 puntos'..."
                 />
                 <div className="token-info-box mt-2">
                   <strong>📊 Tokens de salida: {state.outputTokens}</strong>
@@ -647,13 +656,13 @@
               </div>
               
               <div className="form-group">
-                <label>Texto de Salida Esperado (Opcional):</label>
+                <label>Texto de Salida Esperado (Puedes delimitar la respuesta):</label>
                 <textarea 
                   className="form-control text-input" 
                   name="outputText" 
                   value={state.outputText} 
                   onChange={handleChange}
-                  placeholder="Respuesta esperada de la IA (opcional)..."
+                  placeholder="Ej: 'Responde en máximo 50 tokens' o 'Lista de 3 puntos'..."
                 />
                 <div className="token-info-box mt-2">
                   <strong>📊 Tokens de salida: {state.outputTokens}</strong>
@@ -806,13 +815,13 @@
               </div>
               
               <div className="form-group">
-                <label>Texto de Salida Esperado (Opcional):</label>
+                <label>Texto de Salida Esperado (Puedes delimitar la respuesta):</label>
                 <textarea 
                   className="form-control text-input" 
                   name="outputText" 
                   value={state.outputText} 
                   onChange={handleChange}
-                  placeholder="Respuesta esperada de la IA (opcional)..."
+                  placeholder="Ej: 'Responde en máximo 50 tokens' o 'Lista de 3 puntos'..."
                 />
                 <div className="token-info-box mt-2">
                   <strong>📊 Tokens de salida: {state.outputTokens}</strong>
