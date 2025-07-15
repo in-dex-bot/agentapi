@@ -258,32 +258,55 @@
           </header>
           <div className="main-container">
                         
-            <div className="alert alert-info mb-4">
-              <h4>📚 Conceptos Clave para las APIs de IA</h4>
-              <p>
-                <strong>Token:</strong> Unidad básica de texto procesado (~4 caracteres o 0.75 palabras)<br/>
-                <strong>Nuevo:</strong> Ahora puedes escribir texto y calcular tokens automáticamente<br/>
-                <strong>Algoritmo de Conteo (Aproximado):</strong><br/>
-              </p>
-              <div className="bg-light p-3 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '13px'}}>
-                <strong>📊 Cómo se calculan los tokens:</strong><br/>
-                • <strong>Palabras cortas</strong> (≤4 chars) = 1 token<br/>
-                • <strong>Palabras medianas</strong> (5-8 chars) = ~1.5 tokens<br/>
-                • <strong>Palabras largas</strong> (>8 chars) = ~2-3 tokens<br/>
-                • <strong>Puntuación</strong> = 0.5 tokens cada una<br/>
-                • <strong>Números/símbolos</strong> = 0.3 tokens cada uno
-              </div>
-              <div className="bg-warning p-3 rounded mt-2" style={{fontSize: '13px'}}>
-                <strong>⚠️ Importante:</strong> Cada IA tiene su propio tokenizador:<br/>
-                • <strong>OpenAI:</strong> tiktoken (muy preciso para inglés)<br/>
-                • <strong>Claude:</strong> Tokenizador propio de Anthropic<br/>
-                • <strong>DeepSeek:</strong> Optimizado para múltiples idiomas<br/>
-                <em>Esta calculadora da una aproximación ±10-15% vs tokenizadores reales</em>
-              </div>
-              <div className="bg-light p-3 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '14px'}}>
-                <strong>Fórmula Universal de Costo = </strong><br/>
-                <span className="text-primary">{'{'}</span>(tokens entrada × costo token entrada) / 1.000.000<span className="text-primary">{'}'}</span> +<br/>
-                <span className="text-success">{'{'}</span>(tokens salida × costo token salida) / 1.000.000<span className="text-success">{'}'}</span>
+            <div className="mb-4">
+              <h4 className="text-center mb-4">📚 Conceptos Clave para las APIs de IA</h4>
+              
+              <div className="row">
+                <div className="col-lg-4 col-md-6 mb-3">
+                  <div className="alert" style={{backgroundColor: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', minHeight: '280px'}}>
+                    <h5><strong>🔤 ¿Qué es un Token?</strong></h5>
+                    <p><strong>Token:</strong> Unidad básica de texto procesado (~4 caracteres o 0.75 palabras)</p>
+                    <p><strong>Nuevo:</strong> Ahora puedes escribir texto y calcular tokens automáticamente</p>
+                    <div className="bg-light p-2 rounded mt-2" style={{fontFamily: 'monospace', fontSize: '12px'}}>
+                      <strong>📊 Cómo se calculan:</strong><br/>
+                      • <strong>Palabras cortas</strong> (≤4 chars) = 1 token<br/>
+                      • <strong>Palabras medianas</strong> (5-8 chars) = ~1.5 tokens<br/>
+                      • <strong>Palabras largas</strong> (>8 chars) = ~2-3 tokens<br/>
+                      • <strong>Puntuación</strong> = 0.5 tokens c/u<br/>
+                      • <strong>Números/símbolos</strong> = 0.3 tokens c/u
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-lg-4 col-md-6 mb-3">
+                  <div className="alert" style={{backgroundColor: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', minHeight: '280px'}}>
+                    <h5><strong>⚠️ Diferencias por IA</strong></h5>
+                    <p><strong>Importante:</strong> Cada IA tiene su propio tokenizador:</p>
+                    <ul style={{fontSize: '13px', paddingLeft: '20px'}}>
+                      <li><strong>OpenAI:</strong> tiktoken (muy preciso para inglés)</li>
+                      <li><strong>Claude:</strong> Tokenizador propio de Anthropic</li>
+                      <li><strong>DeepSeek:</strong> Optimizado para múltiples idiomas</li>
+                    </ul>
+                    <div className="bg-warning p-2 rounded mt-2" style={{fontSize: '12px'}}>
+                      <em>Esta calculadora da una aproximación ±10-15% vs tokenizadores reales</em>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-lg-4 col-md-12 mb-3">
+                  <div className="alert" style={{backgroundColor: '#fff3cd', borderColor: '#ffeaa7', color: '#856404', minHeight: '280px'}}>
+                    <h5><strong>💰 Fórmula Universal</strong></h5>
+                    <p>Cálculo de costo para todas las IAs:</p>
+                    <div className="bg-light p-2 rounded" style={{fontFamily: 'monospace', fontSize: '12px'}}>
+                      <strong>Costo Total = </strong><br/>
+                      <span className="text-primary">{'{'}</span>(tokens entrada × costo token entrada) / 1.000.000<span className="text-primary">{'}'}</span> +<br/>
+                      <span className="text-success">{'{'}</span>(tokens salida × costo token salida) / 1.000.000<span className="text-success">{'}'}</span>
+                    </div>
+                    <small className="text-muted mt-2 d-block">
+                      Los precios por token varían según el proveedor, pero la fórmula es universal.
+                    </small>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -825,3 +848,4 @@
   </script>
 </body>
 </html>
+
